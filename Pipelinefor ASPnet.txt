@@ -1,0 +1,35 @@
+
+pipeline {
+    agent any
+   
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/mastersofterp/JenkinASP.git'
+                sh 'ls -la'
+            }
+        }
+		
+        stage('Build') {
+            steps {
+				echo 'code is build'
+                sh 'docker build -t my-notes-app .'
+                }
+            }
+		stage('Run') {
+			steps{
+				echo 'Pushing the image to dockerHub'
+                sh 'docker tag my-notes-app mastersofterp/my-notes-app:latest'
+                sh "docker login -u 'mastersofterp' -p 'dockerhub@123'"
+                sh 'docker push mastersofterp/my-notes-app:latest'
+			}
+		}
+		stage('Release') {
+            steps {
+				echo 'deploying the code'
+                sh 'docker run -d -p 8081:5000 mastersofterp/my-notes-app:latest'
+                }
+            }
+        
+    }
+}
